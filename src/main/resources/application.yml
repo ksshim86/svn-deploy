@@ -1,0 +1,41 @@
+spring:
+  profiles:
+    active: local
+
+  datasource:  
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://192.168.0.115:3306/new_deploy
+    username: user  
+    password: user1!
+    hikari:
+      connection-test-query: SELECT 1
+
+  jpa:  
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        "[format_sql]": true
+    # ddl script 파일 생성
+    #   javax:
+    #     persistence:
+    #       schema-generation:
+    #         create-source: metadata
+    #         scripts:
+    #           action: create
+    #           create-target: create.sql
+        
+# log4j2
+logging:
+  config: classpath:log4j2.xml
+  # 쿼리 바인딩 파라미터를 보여준다.
+  level:
+    org:
+      hibernate:
+        type:
+          descriptor:
+            sql: trace
+  
