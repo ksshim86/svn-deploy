@@ -1,4 +1,4 @@
-package com.ks.sd.api.sys.entity;
+package com.ks.sd.api.info.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,11 +22,11 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class SdSystem extends BaseTimeEntity {
+public class SdInfo extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-    private Integer sysNo;
+    private Integer sdInfoNo;
 
     @Column(nullable = false)
     private String dpPath;

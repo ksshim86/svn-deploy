@@ -1,4 +1,4 @@
-package com.ks.sd.api.sys.controller;
+package com.ks.sd.api.info.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,26 +9,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ks.sd.api.sys.entity.SdSystem;
-import com.ks.sd.api.sys.service.SdSystemService;
+import com.ks.sd.api.info.entity.SdInfo;
+import com.ks.sd.api.info.service.SdInfoService;
 
 @RestController
 @RequestMapping("/api/sys")
-public class SdSystemController {
+public class SdInfoController {
     @Autowired
-    private SdSystemService sdSystemService;
+    private SdInfoService sdInfoService;
 
     @GetMapping
-    public ResponseEntity<SdSystem> getSdSystem() {
-        SdSystem sdSystem = sdSystemService.getSdSystem();
+    public ResponseEntity<SdInfo> getSdSystem() {
+        SdInfo sdSystem = sdInfoService.getSdSystem();
 
         return new ResponseEntity<>(sdSystem, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<SdSystem> saveSdSystem(@RequestBody SdSystem saveSdSystem ) {
-        SdSystem sdSystem = sdSystemService.saveSdSystem(saveSdSystem);
+    public ResponseEntity<SdInfo> saveSdInfo(@RequestBody SdInfo paramSdInfo) {
+        SdInfo sdInfo = sdInfoService.saveSdSystem(paramSdInfo);
 
-        return new ResponseEntity<>(sdSystem, HttpStatus.OK);
+        return new ResponseEntity<>(sdInfo, HttpStatus.OK);
     }
 }

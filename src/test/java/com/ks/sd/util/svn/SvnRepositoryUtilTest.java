@@ -19,6 +19,8 @@ import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNCopySource;
+import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 @SpringBootTest
@@ -68,7 +70,7 @@ public class SvnRepositoryUtilTest {
     }
 
     @Test
-    void fileMoveTest() throws SVNException {
+    void fileMoveCheckTest() throws SVNException {
         SVNURL url = SVNURL.parseURIEncoded("svn://192.168.0.186/prj-siis");
         SVNRepository repository = SVNRepositoryFactory.create(url);
         ISVNAuthenticationManager authManager = 
@@ -86,5 +88,43 @@ public class SvnRepositoryUtilTest {
                 }
             }
         });
+    }
+
+    @Test
+    void createBranchTest() throws SVNException {
+        String svnUrl = "svn://192.168.0.186/sd-test-repo";
+        String username = "svndeploy";
+        String password = "svndeploy1!";
+        String branchName = "stg-branch";
+        String branchMessage = "Creating stg branch";
+
+        SVNURL url = SVNURL.parseURIEncoded(svnUrl);
+        SVNClientManager clientManager = SVNClientManager.newInstance();
+        ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(username, password.toCharArray());
+        clientManager.setAuthenticationManager(authManager);
+
+        SVNURL branchUrl = SVNURL.parseURIEncoded(svnUrl + "/" + branchName);
+
+        SVNCopySource[] sources = new SVNCopySource[] {
+            new SVNCopySource(
+                SVNRevision.HEAD,
+                SVNRevision.HEAD,
+                SVNURL.parseURIEncoded(svnUrl + "/trunk"))};
+
+        try {
+            clientManager.getCopyClient().doCopy(
+                sources,
+                branchUrl,
+                false,
+                false,
+                false,
+                branchMessage,
+                null);
+            System.out.println("Branch created successfully!");
+        } catch (SVNException e) {
+            System.err.println("Error creating branch: " + e.getMessage());
+        } finally {
+            clientManager.dispose();
+        }
     }
 }
