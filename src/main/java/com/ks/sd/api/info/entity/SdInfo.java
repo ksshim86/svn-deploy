@@ -29,5 +29,5 @@ public class SdInfo extends BaseTimeEntity {
     private Integer sdInfoNo;
 
     @Column(nullable = false)
-    private String dpPath;
+    private String sdRootPath;
 }

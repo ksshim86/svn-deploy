@@ -39,102 +39,96 @@ public class ProjectRepositoryTest {
     SubProjectRepository subProjectRepository;
 
     @Test
+    @Transactional
     void saveProjectTest() {
-        String pjtKey = "SAMPLE_KEY";
-        String dpSvnUrl = "svn://192.168.0.186/prj-siis-sis-deploy";
+        String pjtKey = "TEST_REPO";
+        String dpSvnUrl = "svn://192.168.0.186/sd-test-repo";
+        Project project = new Project();
 
-        Project project = 
-            Project.builder()
-                .pjtKey(pjtKey)
-                .pjtNm("샘플프로젝트")
-                .devSvnUrl("svn://192.168.0.186/prj-siis-sis")
-                .dpSvnUrl(dpSvnUrl)
-                .svnUsername("svndeploy")
-                .svnPassword("svndeploy1!")
-                .dcr((long) 0)
-                .build();
-        projectRepository.save(project);
-
-        // projectRepository.findAll().forEach(p -> {
-        //     System.out.println(p.toString());
-        // });
-        // SubProject subProject = SubProject.builder().project(project).subPjtNm("sub-project").build();
-        // subProjectRepository.save(subProject);
-
-        // Project project = projectRepository.findById(1).get();
-
-        // System.out.println(project.getSubProjectList().size());
-        // List<SubProject> list = subProjectRepository.findAllByProject(project);
-
-        // System.out.println(list.get(0).getProject().getPjtKey());
-        // System.out.println(list.get(0).getSubPjtNm());
-    }
-
-    @Test
-    void saveSubProjectTest() {
-        Project project = projectRepository.findById(3).get();
-
-        subProjectRepository.save(
-            SubProject.builder()
-                .project(project)
-                .subPjtNm("smp-pjt-nm-1")
-                .build()
-        );
-    }
-
-    @Transactional
-    @Test
-    void getProject() {
-    }
-
-    @Transactional
-    @Test
-    void getSubProject() {
-        Project project = projectRepository.findById(2).get();
-
-        Optional<List<SubProject>> list = subProjectRepository.findByProjectAndDelYn(
-            project,
-            "N"
-        );
-        System.out.println(list.isPresent());
-    }
-
-    @Test
-    void beforeStartedUpdateTest() throws Exception {
-        // ProjectSaveRequest projectSaveRequest = new ProjectSaveRequest(
-        //     "PTL_REPORT",
-        //     "리포트",
-        //     "svn://192.168.0.186/prj-siis-ptlReport",
-        //     "svn://192.168.0.186/prj-siis-ptlReport-deploy",
-        //     "svndeploy",
-        //     "svndeploy1!",
-        //     (long) 0
-        // );
+        ProjectSaveRequest projectSaveRequest = new ProjectSaveRequest();
+        projectSaveRequest.setPjtKey(pjtKey);
+        projectSaveRequest.setPjtNm("테스트프로젝트");
+        projectSaveRequest.setDevSvnUrl("svn://192.168.0.186/prj-siis-ptlReport");
+        projectSaveRequest.setDpSvnUrl(dpSvnUrl);
+        projectSaveRequest.setSvnUsername("svndeploy");
+        projectSaveRequest.setSvnPassword("svndeploy1!");
+        projectSaveRequest.setDcr((long) 0);
+ 
+        Project saveProjevct = projectRepository.save(projectSaveRequest.toEntity());
+        System.out.println(saveProjevct.toString());
         
-        // ProjectSaveResponse projectSaveResponse = projectService.saveProject(projectSaveRequest);
-        
-        // Project project = projectRepository.findById(projectSaveResponse.getPjtNo()).get();
-        
-        // System.out.println(project.getStartedYn());
-        // ProjectUpdateRequest projectUpdateRequest = new ProjectUpdateRequest(
-        //     project.getPjtNo(),
-        //     project.getPjtNm(),
-        //     project.getDevSvnUrl(),
-        //     project.getDpSvnUrl(),
-        //     project.getSvnUsername(),
-        //     project.getSvnPassword() + "!",
-        //     (long) 0,
-        //     "N",
-        //     "N",
-        //     "N"
-        // );
+        project = projectRepository.findById(saveProjevct.getPjtNo()).get();
+        System.out.println(project.getDelYn() + ", " + project.getStartedYn());
 
-        // projectService.updateProject(projectUpdateRequest);
     }
 
-    @AfterEach
-    void after() throws Exception {
-        projectRepository.deleteAll();
-        SdFileUtil.cleanDirectory("C:\\deploy");
-    }
+    // @Test
+    // void saveSubProjectTest() {
+    //     Project project = projectRepository.findById(3).get();
+
+    //     subProjectRepository.save(
+    //         SubProject.builder()
+    //             .project(project)
+    //             .subPjtNm("smp-pjt-nm-1")
+    //             .build()
+    //     );
+    // }
+
+    // @Transactional
+    // @Test
+    // void getProject() {
+    //     Project project = projectRepository.findById(1).get();
+    //     System.out.println(project.toString());
+    // }
+
+    // @Transactional
+    // @Test
+    // void getSubProject() {
+    //     Project project = projectRepository.findById(2).get();
+
+    //     Optional<List<SubProject>> list = subProjectRepository.findByProjectAndDelYn(
+    //         project,
+    //         "N"
+    //     );
+    //     System.out.println(list.isPresent());
+    // }
+
+    // @Test
+    // void beforeStartedUpdateTest() throws Exception {
+    //     // ProjectSaveRequest projectSaveRequest = new ProjectSaveRequest(
+    //     //     "PTL_REPORT",
+    //     //     "리포트",
+    //     //     "svn://192.168.0.186/prj-siis-ptlReport",
+    //     //     "svn://192.168.0.186/prj-siis-ptlReport-deploy",
+    //     //     "svndeploy",
+    //     //     "svndeploy1!",
+    //     //     (long) 0
+    //     // );
+        
+    //     // ProjectSaveResponse projectSaveResponse = projectService.saveProject(projectSaveRequest);
+        
+    //     // Project project = projectRepository.findById(projectSaveResponse.getPjtNo()).get();
+        
+    //     // System.out.println(project.getStartedYn());
+    //     // ProjectUpdateRequest projectUpdateRequest = new ProjectUpdateRequest(
+    //     //     project.getPjtNo(),
+    //     //     project.getPjtNm(),
+    //     //     project.getDevSvnUrl(),
+    //     //     project.getDpSvnUrl(),
+    //     //     project.getSvnUsername(),
+    //     //     project.getSvnPassword() + "!",
+    //     //     (long) 0,
+    //     //     "N",
+    //     //     "N",
+    //     //     "N"
+    //     // );
+
+    //     // projectService.updateProject(projectUpdateRequest);
+    // }
+
+    // @AfterEach
+    // void after() throws Exception {
+    //     projectRepository.deleteAll();
+    //     SdFileUtil.cleanDirectory("C:\\deploy");
+    // }
 }

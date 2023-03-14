@@ -31,14 +31,24 @@ public class SdInfoService {
         }
     }
 
-    public SdInfo saveSdSystem(SdInfo sdInfo) {
-        String dpPath = sdInfo.getDpPath();
+    public String getSdRootPath() {
+        Optional<SdInfo> optSdInfo = sdInfoRepository.findById(1);
+        
+        if (optSdInfo.isPresent()) {
+            return optSdInfo.get().getSdRootPath();
+        } else {
+            return "";
+        }
+    }
 
-        if (sdInfo.getDpPath() == null || sdInfo.getDpPath().equals("")) {
+    public SdInfo saveSdSystem(SdInfo sdInfo) {
+        String sdRootPath = sdInfo.getSdRootPath();
+
+        if (sdRootPath == null || sdRootPath.equals("")) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
-        if (!SdFileUtil.mkdirs(Paths.get(dpPath).toString())) {
+        if (!SdFileUtil.mkdirs(Paths.get(sdRootPath).toString())) {
             throw new BusinessException(ErrorCode.SVR_MKDIR_FAILED);
         }
 

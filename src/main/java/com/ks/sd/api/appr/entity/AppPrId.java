@@ -1,4 +1,4 @@
-package com.ks.sd.api.pjt.entity;
+package com.ks.sd.api.appr.entity;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubProjectId implements Serializable {
-    private Integer subPjtNo;
+public class AppPrId implements Serializable {
+    private Integer appPrOrdr;
     private Integer project;
 }

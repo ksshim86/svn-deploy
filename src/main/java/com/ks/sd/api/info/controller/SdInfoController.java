@@ -13,7 +13,7 @@ import com.ks.sd.api.info.entity.SdInfo;
 import com.ks.sd.api.info.service.SdInfoService;
 
 @RestController
-@RequestMapping("/api/sys")
+@RequestMapping("/api/info")
 public class SdInfoController {
     @Autowired
     private SdInfoService sdInfoService;
@@ -29,6 +29,6 @@ public class SdInfoController {
     public ResponseEntity<SdInfo> saveSdInfo(@RequestBody SdInfo paramSdInfo) {
         SdInfo sdInfo = sdInfoService.saveSdSystem(paramSdInfo);
 
-        return new ResponseEntity<>(sdInfo, HttpStatus.OK);
+        return new ResponseEntity<>(sdInfo, HttpStatus.CREATED);
     }
 }

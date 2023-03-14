@@ -17,6 +17,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.ks.sd.api.appr.entity.AppPr;
 import com.ks.sd.api.pjt.dto.ProjectUpdateRequest;
 import com.ks.sd.base.entity.BaseEntity;
 
@@ -73,6 +74,9 @@ public class Project extends BaseEntity {
     @OneToMany(mappedBy = "project")
     @OrderBy("subPjtNo ASC")
     private List<SubProject> subProjects;
+
+    @OneToMany(mappedBy = "project")
+    private List<AppPr> appPrs;
     
     // 프로젝트 시작전 수정
     public void beforeStartedUpdate(ProjectUpdateRequest projectUpdateRequest) {

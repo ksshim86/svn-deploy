@@ -1,5 +1,6 @@
 package com.ks.sd.util.svn;
 
+import java.io.File;
 import java.nio.file.Paths;
 
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.util.SVNEncodingUtil;
@@ -15,7 +17,9 @@ import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNCopySource;
 import org.tmatesoft.svn.core.wc.SVNEvent;
+import org.tmatesoft.svn.core.wc.SVNInfo;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
@@ -32,13 +36,15 @@ public class SvnRepositoryUtil {
      */
     public static boolean isConnect(String svnUrl, String svnUsername, String svnPassword) {
         boolean isConnect = false;
+        SVNRepository repository = null;
+         
         try {
             if (svnUrl != null && svnUrl.length() > 0 && 
                 svnUsername != null && svnUsername.length() > 0 && 
                 svnPassword != null && svnPassword.length() > 0) {
 
                 String encodedUrl = SVNEncodingUtil.autoURIEncode(svnUrl);
-                SVNRepository repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(encodedUrl));
+                repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(encodedUrl));
                 ISVNAuthenticationManager authManager = 
                     SVNWCUtil.createDefaultAuthenticationManager(svnUsername, svnPassword.toCharArray());
                 repository.setAuthenticationManager(authManager);
@@ -51,6 +57,10 @@ public class SvnRepositoryUtil {
         } catch (SVNException e) {
             LOGGER.debug(e.toString());
             isConnect = false;
+        } finally {
+            if (repository != null) {
+                repository.closeSession();
+            }
         }
 
         LOGGER.debug(svnUrl + " isConnect: " + isConnect);
@@ -71,8 +81,8 @@ public class SvnRepositoryUtil {
         String encodeSvnUrl = SVNEncodingUtil.autoURIEncode(svnUrl);
         
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
-        SVNClientManager deploySvnClientManager = SVNClientManager.newInstance(options, svnUsername, svnPassword);
-        SVNUpdateClient updateClient = deploySvnClientManager.getUpdateClient();
+        SVNClientManager clientManager = SVNClientManager.newInstance(options, svnUsername, svnPassword);
+        SVNUpdateClient updateClient = clientManager.getUpdateClient();
         
         try {
             updateClient.setEventHandler(new ISVNEventHandler() {
@@ -93,25 +103,124 @@ public class SvnRepositoryUtil {
         } catch (SVNException e) {
             LOGGER.debug(e.toString());
             isResult = false;
+        } finally {
+            clientManager.dispose();
         }
 
         return isResult;
     }
 
+    /**
+     * SVN 최신 리비전 조회
+     * @param svnUrl
+     * @param svnUsername
+     * @param svnPassword
+     * @return
+     */
     public static Long getLatestRevision(String svnUrl, String svnUsername, String svnPassword) {
         Long latestRevision = -1L;
+        SVNRepository repository = null;
 
         try {
-            SVNRepository repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(svnUrl));
+            repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(svnUrl));
             ISVNAuthenticationManager authManager = 
                             SVNWCUtil.createDefaultAuthenticationManager(svnUsername, svnPassword.toCharArray());
             repository.setAuthenticationManager(authManager);
-
             latestRevision = repository.getLatestRevision();
         } catch (SVNException e) {
             LOGGER.debug(e.toString());
+        } finally {
+            if (repository != null) {
+                repository.closeSession();
+            }
         }
         
         return latestRevision;
+    }
+
+    /**
+     * SVN 브랜치 생성
+     * @param svnUrl
+     * @param svnUsername
+     * @param svnPassword
+     * @param branchName
+     * @param message
+     */
+    public static boolean createBranch(
+        String svnUrl, String svnUsername, String svnPassword, 
+        String orgBranchNm, String dstBranchNm, String message
+    ) {
+        boolean isResult = false;
+        SVNClientManager clientManager = SVNClientManager.newInstance();
+        ISVNAuthenticationManager authManager = 
+            SVNWCUtil.createDefaultAuthenticationManager(svnUsername, svnPassword.toCharArray());
+        clientManager.setAuthenticationManager(authManager);
+        
+        try {
+            SVNURL orgBranchUrl = SVNURL.parseURIEncoded(svnUrl + orgBranchNm);
+            SVNURL dstBranchUrl = SVNURL.parseURIEncoded(svnUrl + dstBranchNm);
+
+            try {
+                SVNInfo svnInfo = 
+                    clientManager.getWCClient().doInfo(dstBranchUrl, SVNRevision.HEAD, SVNRevision.HEAD);
+                if (svnInfo != null && svnInfo.getKind() == SVNNodeKind.DIR) {
+                    LOGGER.debug("Branch already exists: " + dstBranchUrl);
+                    isResult = false;
+    
+                    return isResult;
+                }
+            } catch (SVNException e) {
+                // exception이 발생했다면 생성되어 있지 않은 branch이기 때문에 문제없음.
+                LOGGER.debug(e.toString());
+            }
+
+            SVNCopySource[] sources = new SVNCopySource[] {
+                new SVNCopySource(
+                    SVNRevision.HEAD,
+                    SVNRevision.HEAD,
+                    orgBranchUrl
+                )
+            };
+            
+            clientManager.getCopyClient().doCopy(
+                sources,
+                dstBranchUrl,
+                false,
+                true,
+                false,
+                message,
+                null
+            );
+
+            isResult = true;
+        } catch (SVNException e) {
+            LOGGER.debug(e.toString());
+            isResult = false;
+        } finally {
+            clientManager.dispose();
+        }
+
+        return isResult;
+    }
+
+    public static boolean update(String svnUrl, String svnUsername, String svnPassword, String workingPath, long revision) {
+        boolean isResult = false;
+        DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
+        SVNClientManager clientManager = SVNClientManager.newInstance(options, svnUsername, svnPassword);
+        SVNUpdateClient updateClient = clientManager.getUpdateClient();
+        updateClient.setIgnoreExternals(false);
+
+        try {
+            File wcDir = new File(workingPath);
+            updateClient.doUpdate(wcDir, SVNRevision.create(revision), SVNDepth.INFINITY, false, false);
+            isResult = true;
+        } catch (SVNException e) {
+            LOGGER.debug(e.toString());
+            isResult = false;
+        } finally {
+            clientManager.dispose();
+       }
+
+       return isResult;
     }
 }
