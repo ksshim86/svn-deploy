@@ -30,6 +30,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Role {
+    @Column(nullable = false)
+    private Integer roleLvl;
+    
     @Id
     @Column(nullable = false)
     private String roleCd;

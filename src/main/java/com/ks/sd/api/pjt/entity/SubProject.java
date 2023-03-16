@@ -1,5 +1,7 @@
 package com.ks.sd.api.pjt.entity;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -8,12 +10,14 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.ks.sd.api.pjt.dto.SubProjectSaveResponse;
+import com.ks.sd.api.rev.entity.SdPath;
 import com.ks.sd.base.entity.BaseEntity;
 
 import lombok.Getter;
@@ -32,7 +36,7 @@ import lombok.experimental.SuperBuilder;
 @IdClass(SubProjectId.class)
 public class SubProject extends BaseEntity {
     @Id
-    @Column(nullable = false)
+    @Column(name = "sub_pjt_no", nullable = false)
     private Integer subPjtNo;
     
     @Column(nullable = false)
@@ -42,6 +46,9 @@ public class SubProject extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pjt_no")
     private Project project;
+
+    @OneToMany(mappedBy = "subProject")
+    private List<SdPath> sdPaths;
 
     public SubProjectSaveResponse update(SubProject subProject) {
         this.subPjtNm = subProject.getSubPjtNm();

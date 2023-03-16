@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AppPrView {
     private Integer pjtNo;
-    private Integer appPrOrdr;
+    private Integer ordr;
     private String roleCd;
     private String roleNm;
     private String useYn;
@@ -22,7 +22,7 @@ public class AppPrView {
     @Builder
     public AppPrView(AppPr appPr) {
         this.pjtNo = appPr.getProject().getPjtNo();
-        this.appPrOrdr = appPr.getAppPrOrdr();
+        this.ordr = appPr.getOrdr();
         this.roleCd = appPr.getRole().getRoleCd();
         this.roleNm = appPr.getRole().getRoleNm();
         this.useYn = appPr.getUseYn();

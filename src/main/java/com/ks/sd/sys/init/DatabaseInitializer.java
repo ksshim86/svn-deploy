@@ -27,10 +27,10 @@ public class DatabaseInitializer implements CommandLineRunner {
 
         LOGGER.debug("Role data initialization start");
         List<Role> roles = new ArrayList<>();
-        roles.add(Role.builder().roleCd("ROLE_LVL1").roleNm("개발자").build());
-        roles.add(Role.builder().roleCd("ROLE_LVL2").roleNm("PL").build());
-        roles.add(Role.builder().roleCd("ROLE_LVL3").roleNm("PM").build());
-        roles.add(Role.builder().roleCd("ROLE_ADMIN").roleNm("관리자").build());
+        roles.add(Role.builder().roleLvl(1).roleCd("ROLE_LVL1").roleNm("개발자").build());
+        roles.add(Role.builder().roleLvl(2).roleCd("ROLE_LVL2").roleNm("PL").build());
+        roles.add(Role.builder().roleLvl(3).roleCd("ROLE_LVL3").roleNm("PM").build());
+        roles.add(Role.builder().roleLvl(4).roleCd("ROLE_ADMIN").roleNm("관리자").build());
         roleRepository.saveAll(roles);
     }
 }

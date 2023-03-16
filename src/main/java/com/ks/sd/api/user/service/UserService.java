@@ -99,8 +99,8 @@ public class UserService {
      */
     public User updateUser(String userId, UserUpdateRequest userUpdateRequest) {
         User user = this.getUserByUserId(userId);
-
         user.update(userUpdateRequest);
+        
         return userRepository.save(user);
     }
 

@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AppPrUpdateRequest {
     private Integer pjtNo;
-    private Integer appPrOrdr;
+    private Integer ordr;
     private String useYn;
 
     public AppPr toEntity() {
         return AppPr.builder()
             .project(Project.builder().pjtNo(pjtNo).build())
-            .appPrOrdr(appPrOrdr)
+            .ordr(ordr)
             .useYn(useYn).build();
     }
 }

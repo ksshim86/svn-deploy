@@ -36,7 +36,9 @@ public enum ErrorCode {
     USER_ALREADY_HAS_ROLE("R002", "사용자가 이미 권한을 가지고 있습니다."),
     USER_NOT_HAS_ROLE("R003", "사용자가 권한을 가지고 있지 않습니다."),
 
-    APPRS_NOT_FOUND("A001", "결재 절차가 존재하지 않습니다.")
+    APPRS_NOT_FOUND("A001", "결재 절차가 존재하지 않습니다."),
+
+    DEPLOY_NOT_FOUND("D001", "배포 정보가 존재하지 않습니다.")
     ;
 
     private final String code;

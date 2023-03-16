@@ -13,11 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoleView {
+    private Integer roleLvl;
     private String roleCd;
     private String roleNm;
 
     @Builder
     public RoleView(Role role) {
+        this.roleLvl = role.getRoleLvl();
         this.roleCd = role.getRoleCd();
         this.roleNm = role.getRoleNm();
     }

@@ -37,7 +37,9 @@ public class RoleService {
      * @return
      */
     public List<RoleView> getAllRoles() {
-        List<Role> roles = roleRepository.findAll();
+        List<Role> roles = 
+            roleRepository.findAllByOrderByRoleLvlAsc()
+                .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
         List<RoleView> roleViews = roles.stream()
             .map(role -> RoleView.builder().role(role).build())
             .collect(Collectors.toList());

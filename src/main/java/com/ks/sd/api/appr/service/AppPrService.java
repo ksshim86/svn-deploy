@@ -50,7 +50,7 @@ public class AppPrService {
                 return AppPr.builder()
                     .project(project)
                     .role(Role.builder().roleCd(roleView.getRoleCd()).build())
-                    .appPrOrdr(i + 1)
+                    .ordr(i + 1)
                     .build();
             })
             .collect(Collectors.toList());
@@ -71,7 +71,7 @@ public class AppPrService {
             .orElseThrow(() -> new BusinessException(ErrorCode.APPRS_NOT_FOUND));
         
         appPrs.stream()
-            .filter(appPr -> appPr.getAppPrOrdr().equals(appPrUpdateRequest.getAppPrOrdr()))
+            .filter(appPr -> appPr.getOrdr().equals(appPrUpdateRequest.getOrdr()))
             .findFirst()
             .ifPresent(appPr -> {
                 appPr.updateUseYn(appPrUpdateRequest.getUseYn());
