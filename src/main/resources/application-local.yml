@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active: local
-
   datasource:  
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://192.168.0.115:3306/new_deploy
@@ -13,21 +10,21 @@ spring:
   jpa:  
     database-platform: org.hibernate.dialect.MariaDB103Dialect
     open-in-view: false
-    show-sql: true
+    show-sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
-        "[format_sql]": true
+        "[format_sql]": false
     # ddl script 파일 생성
-    #   javax:
-    #     persistence:
-    #       schema-generation:
-    #         create-source: metadata
-    #         scripts:
-    #           action: create
-    #           create-target: create.sql
-        
+      javax:
+        persistence:
+          schema-generation:
+            create-source: metadata
+            scripts:
+              action: drop-and-create
+              create-target: create.sql
+              drop-target: drop.sql
 # log4j2
 logging:
   config: classpath:log4j2.xml
@@ -37,5 +34,5 @@ logging:
       hibernate:
         type:
           descriptor:
-            sql: trace
+            sql: info
   
