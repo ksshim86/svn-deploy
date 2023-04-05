@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ks.sd.api.appr.repository.AppPrRepository;
@@ -28,10 +29,9 @@ import com.ks.sd.errors.exception.BusinessException;
 import com.ks.sd.util.file.SdFileUtil;
 import com.ks.sd.util.svn.SvnRepositoryUtil;
 
-@Transactional
 @Service
 public class ProjectService {
-    private final static Logger LOGGER = LoggerFactory.getLogger(SvnRepositoryUtil.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ProjectService.class);
 
     @Autowired
     private SdInfoService sdInfoService;
@@ -48,6 +48,7 @@ public class ProjectService {
     /**
      * 프로젝트 조회(서브 프로젝트 포함)
      */
+    @Transactional
     public List<ProjectMngResponse> getProjectMngs(ProjectSearchRequest projectSearchRequest) {
         List<ProjectMngResponse> projectMngResponses = new ArrayList<ProjectMngResponse>();
 
@@ -59,7 +60,7 @@ public class ProjectService {
                 
                 if (projectSearchRequest.isIncludeSubPjt()) {
                     Optional<List<SubProject>> optSubProjects = 
-                        subProjectRepository.findByProjectAndDelYn(project, "N");
+                        subProjectRepository.findByProject(project);
                     
                     optSubProjects.ifPresent(subProjects -> {
                         subProjects.forEach(subProject -> {
@@ -80,17 +81,74 @@ public class ProjectService {
         return projectMngResponses;
     }
 
-    public ProjectMngResponse getProjectByPjtNo(Integer pjtNo) {
+    /**
+     * 프로젝트 조회
+     * @param pjtNo
+     * @return
+     */
+    @Transactional
+    public ProjectMngResponse getProjectMngResponseByPjtNo(Integer pjtNo) {
         Project project = 
             projectRepository.findById(pjtNo)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PJT_NOT_FOUND));
 
         return ProjectMngResponse.builder().project(project).build();
     }
+
+    /**
+     * 프로젝트 조회
+     * @param pjtNo
+     * @return
+     */
+    @Transactional
+    public Project getProjectByPjtNo(Integer pjtNo) {
+        Project project = 
+            projectRepository.findById(pjtNo)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PJT_NOT_FOUND));
+
+        return project;
+    }
+
+    @Transactional
+    public List<ProjectMngResponse> getProjectsByDelYn(String delYn) {
+        List<ProjectMngResponse> projectMngResponses = new ArrayList<ProjectMngResponse>();
+
+        Optional<List<Project>> optProjects = projectRepository.findByDelYn(delYn);
+
+        optProjects.ifPresent(projects -> {
+            projects.forEach(project -> {
+                ProjectMngResponse projectMngResponse
+                    = ProjectMngResponse.builder().project(project).build();
+
+                projectMngResponses.add(projectMngResponse);
+            });
+        });
+
+        return projectMngResponses;
+    }
+
+    @Transactional
+    public List<ProjectMngResponse> getProjectsByDelYnAndDpStAndStartedYnAndRcsSt(String delYn, String dpSt, String startedYn, String rcsSt) {
+        List<ProjectMngResponse> projectMngResponses = new ArrayList<ProjectMngResponse>();
+
+        Optional<List<Project>> optProjects = projectRepository.findByDelYnAndDpStAndStartedYnAndRcsSt(delYn, dpSt, startedYn, rcsSt);
+
+        optProjects.ifPresent(projects -> {
+            projects.forEach(project -> {
+                ProjectMngResponse projectMngResponse
+                    = ProjectMngResponse.builder().project(project).build();
+
+                projectMngResponses.add(projectMngResponse);
+            });
+        });
+
+        return projectMngResponses;
+    }
     
     /**
      * 프로젝트 저장
      */
+    @Transactional
     public ProjectSaveResponse saveProject(ProjectSaveRequest projectSaveRequest) throws Exception {
         Project project = new Project();
         String devSvnUrl = projectSaveRequest.getDevSvnUrl();
@@ -165,16 +223,8 @@ public class ProjectService {
         }
 
         if (errorCode == null) {
-            LOGGER.debug("개발 SVN 최신 리비전 조회");
-            Long dcr = SvnRepositoryUtil.getLatestRevision(devSvnUrl, svnUsername, svnPassword);
-    
-            if (0 > dcr) {
-                errorCode = ErrorCode.SVN_REVISION_NOT_FOUND;
-            }
-    
-            projectSaveRequest.setDcr(dcr);
-            
             LOGGER.debug("프로젝트 정보 저장");
+            projectSaveRequest.setDcr(0L);
             project = projectRepository.save(projectSaveRequest.toEntity());
         }
 
@@ -190,6 +240,7 @@ public class ProjectService {
     /**
      * 프로젝트 수정
      */
+    @Transactional
     public ProjectSaveResponse updateProject(ProjectUpdateRequest projectUpdateRequest) {
         Project project = projectRepository.findById(
             projectUpdateRequest.getPjtNo()).orElseThrow(() -> new BusinessException(ErrorCode.UPDATE_TARGET_NOT_FOUND));
@@ -315,6 +366,7 @@ public class ProjectService {
      * 프로젝트 삭제
      * @param pjtNo
      */
+    @Transactional
     public void deleteProject(Integer pjtNo) {
         Project project = projectRepository.findById(pjtNo)
             .orElseThrow(() -> new BusinessException(ErrorCode.DELETE_TARGET_NOT_FOUND));
@@ -336,5 +388,13 @@ public class ProjectService {
             LOGGER.debug("프로젝트 정보 삭제");
             project.delete();
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateProjectByRcsSt(Integer pjtNo, String rcsSt) {
+        Project project = projectRepository.findById(pjtNo)
+            .orElseThrow(() -> new BusinessException(ErrorCode.UPDATE_TARGET_NOT_FOUND));
+
+        project.updateRcsSt(rcsSt);
     }
 }

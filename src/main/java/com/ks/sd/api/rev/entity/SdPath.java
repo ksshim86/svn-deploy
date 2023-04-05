@@ -6,11 +6,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
@@ -39,18 +39,12 @@ import lombok.experimental.SuperBuilder;
 @DynamicUpdate
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-@IdClass(SdPath.SdPathId.class)
 public class SdPath implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    @Id
-    @Column(name = "pjt_no", nullable = false)
-    private Integer pjtNo;
-
-    @Id
-    @Column(name = "rev_no", nullable = false)
-    private Integer revNo;
-
+    @EmbeddedId
+    private SdPathId id;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
         @JoinColumn(name = "pjt_no", referencedColumnName = "pjt_no", insertable = false, updatable = false),
@@ -67,10 +61,6 @@ public class SdPath implements Serializable {
         @JoinColumn(name = "sub_pjt_no", referencedColumnName = "sub_pjt_no", insertable = false, updatable = false)
     })
     private SubProject subProject;
-
-    @Id
-    @Column(nullable = false)
-    private Integer ordr;
 
     @Column(nullable = false)
     private String combined;
@@ -97,18 +87,21 @@ public class SdPath implements Serializable {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @Embeddable
     public static class SdPathId implements Serializable {
         private static final long serialVersionUID = 1L;
-        
+        @Column(name = "pjt_no", nullable = false)
         private Integer pjtNo;
+        @Column(name = "rev_no", nullable = false)
         private Integer revNo;
+        @Column(name = "ordr", nullable = false)
         private Integer ordr;
     }
 
     @PrePersist
     @PreUpdate
     private void updateCombinedKeyHash() {
-        String combinedKey = String.format("%d|%s|%s", this.pjtNo, this.filePath, this.fileNm);
+        String combinedKey = String.format("%d|%s|%s", this.id.getPjtNo(), this.filePath, this.fileNm);
         combined = sha256(combinedKey);
     }
 
@@ -126,5 +119,9 @@ public class SdPath implements Serializable {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Error generating SHA-256 hash", e);
         }
+    }
+
+    public void updateSubPjtNo(Integer subPjtNo) {
+        this.subPjtNo = subPjtNo;
     }
 }

@@ -14,5 +14,9 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
     @Query("SELECT p FROM Project p WHERE (:#{#request.delYn} IS NULL OR p.delYn = :#{#request.delYn})")
     Optional<List<Project>> searchProjects(@Param("request") ProjectSearchRequest projectSearchRequest);
 
+    Optional<List<Project>> findByDelYn(String delYn);
+
+    Optional<List<Project>> findByDelYnAndDpStAndStartedYnAndRcsSt(String delYn, String dpSt, String startedYn, String rcsSt);
+    
     void deleteByPjtNo(Integer pjtNo);
 }

@@ -8,9 +8,11 @@ import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -18,7 +20,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.ks.sd.api.pjt.dto.SubProjectSaveResponse;
 import com.ks.sd.api.rev.entity.SdPath;
-import com.ks.sd.base.entity.BaseEntity;
+import com.ks.sd.base.entity.BaseTimeEntity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +36,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @IdClass(SubProjectId.class)
-public class SubProject extends BaseEntity {
+@Table(indexes = @Index(name = "unique_idex_sub_project_subPjtNm", columnList = "subPjtNm", unique = true))
+public class SubProject extends BaseTimeEntity {
     @Id
     @Column(name = "sub_pjt_no", nullable = false)
     private Integer subPjtNo;

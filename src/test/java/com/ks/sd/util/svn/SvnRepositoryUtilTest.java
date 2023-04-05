@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +27,7 @@ import org.tmatesoft.svn.core.SVNLogEntryPath;
 import org.tmatesoft.svn.core.SVNProperty;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
+import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
@@ -48,7 +50,7 @@ import org.tmatesoft.svn.core.wc2.SvnTarget;
 
 import com.ks.sd.util.file.SdFileUtil;
 
-@SpringBootTest
+// @SpringBootTest
 public class SvnRepositoryUtilTest {
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private String SVN_URL = "";
@@ -346,5 +348,47 @@ public class SvnRepositoryUtilTest {
         String workingPath = "C:\\deploy\\TEST_REPO\\branches\\staging";
         
         SvnRepositoryUtil.update(svnUrl, username, password, workingPath, oldRevision);
+    }
+
+    @Test
+    void doLogTest() throws SVNException {
+        String svnUrl = "svn://192.168.0.186/prj-siis-ptlReport";
+        String username = "svndeploy";
+        String password = "svndeploy1!";
+
+        List<SVNLogEntry> logEntryList = SvnRepositoryUtil.fetchSvnLog(svnUrl, username, password, 1, 1);
+
+        logEntryList.forEach(logEntry -> {
+            System.out.println(logEntry.getRevision() + " > " + logEntry.getAuthor() + " > " + logEntry.getMessage());
+        });
+    }
+
+    @Test
+    void doLogTest2() throws SVNException {
+        String svnUrl = "svn://192.168.0.186/prj-siis-ptlReport";
+        String svnUsername = "svndeploy";
+        String svnPassword = "svndeploy1!";
+
+        DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
+        SVNClientManager clientManager = SVNClientManager.newInstance(options, svnUsername, svnPassword);
+        SVNLogClient logClient = clientManager.getLogClient();
+        List<SVNLogEntry> logEntryList = new ArrayList<>();
+
+        String[] paths = {"/"};
+
+        logClient.doLog(
+            SVNURL.parseURIEncoded(svnUrl),
+            paths,
+            SVNRevision.create(1),
+            SVNRevision.create(1),
+            SVNRevision.create(1),
+            false, true, false, 999999L, null,
+            new ISVNLogEntryHandler() {
+                @Override
+                public void handleLogEntry(SVNLogEntry logEntry) throws SVNException {
+                    logEntry.getChangedPaths();
+                }
+            }
+        );
     }
 }

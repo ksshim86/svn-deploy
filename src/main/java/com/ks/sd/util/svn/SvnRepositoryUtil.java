@@ -2,12 +2,15 @@ package com.ks.sd.util.svn;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
@@ -20,6 +23,7 @@ import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNCopySource;
 import org.tmatesoft.svn.core.wc.SVNEvent;
 import org.tmatesoft.svn.core.wc.SVNInfo;
+import org.tmatesoft.svn.core.wc.SVNLogClient;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
@@ -203,13 +207,22 @@ public class SvnRepositoryUtil {
         return isResult;
     }
 
+    /**
+     * SVN update
+     * @param svnUrl
+     * @param svnUsername
+     * @param svnPassword
+     * @param workingPath
+     * @param revision
+     * @return
+     */
     public static boolean update(String svnUrl, String svnUsername, String svnPassword, String workingPath, long revision) {
         boolean isResult = false;
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
         SVNClientManager clientManager = SVNClientManager.newInstance(options, svnUsername, svnPassword);
         SVNUpdateClient updateClient = clientManager.getUpdateClient();
         updateClient.setIgnoreExternals(false);
-
+        
         try {
             File wcDir = new File(workingPath);
             updateClient.doUpdate(wcDir, SVNRevision.create(revision), SVNDepth.INFINITY, false, false);
@@ -222,5 +235,49 @@ public class SvnRepositoryUtil {
        }
 
        return isResult;
+    }
+
+    /**
+     * SVN log 조회
+     * @param svnUrl
+     * @param svnUsername
+     * @param svnPassword
+     * @param startRev
+     * @param endRev
+     * @return
+     */
+    public static List<SVNLogEntry> fetchSvnLog(
+        String svnUrl, String svnUsername, String svnPassword, long startRev, long endRev
+    ) {
+        DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
+        SVNClientManager clientManager = SVNClientManager.newInstance(options, svnUsername, svnPassword);
+        SVNLogClient logClient = clientManager.getLogClient();
+        List<SVNLogEntry> logEntryList = new ArrayList<>();
+
+        try {
+            String[] paths = {"/"};
+            fetchLogEntries(logClient, svnUrl, paths, startRev, endRev, logEntryList);
+        } catch (Exception e) {
+            LOGGER.debug(e.toString());
+        } finally {
+            clientManager.dispose();
+        }
+
+        return logEntryList;
+    }
+
+    private static void fetchLogEntries(
+        SVNLogClient logClient, String svnUrl, String[] paths,
+        long startRev, long endRev, List<SVNLogEntry> logEntryList
+    ) throws SVNException {
+        logClient.doLog(
+            SVNURL.parseURIEncoded(svnUrl),
+            paths,
+            SVNRevision.create(startRev),
+            SVNRevision.create(startRev),
+            SVNRevision.create(endRev),
+            false, true, false, 999999L, null,
+            logEntryList::add
+        );
     }
 }

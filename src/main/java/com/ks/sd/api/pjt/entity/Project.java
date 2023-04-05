@@ -115,4 +115,12 @@ public class Project extends BaseEntity {
         this.rcsSt = projectUpdateRequest.getRcsSt();
         this.dpSt = projectUpdateRequest.getDpSt();
     }
+
+    public void updateRcsSt(String rcsSt) {
+        this.rcsSt = rcsSt;
+    }
+
+    public void updateDcr(Long dcr) {
+        this.dcr = dcr;
+    }
 }

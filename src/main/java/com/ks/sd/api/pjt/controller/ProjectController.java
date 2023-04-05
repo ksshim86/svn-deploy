@@ -44,7 +44,7 @@ public class ProjectController {
     public ResponseEntity<ProjectMngResponse> saveProject(@RequestBody ProjectSaveRequest projectSaveRequest) throws Exception {
         ProjectSaveResponse projectSaveResponse = projectService.saveProject(projectSaveRequest);
         appPrService.saveAppPrs(Project.builder().pjtNo(projectSaveResponse.getPjtNo()).build());
-        ProjectMngResponse projectMngResponse =  projectService.getProjectByPjtNo(projectSaveResponse.getPjtNo());
+        ProjectMngResponse projectMngResponse =  projectService.getProjectMngResponseByPjtNo(projectSaveResponse.getPjtNo());
         
         return new ResponseEntity<>(projectMngResponse, HttpStatus.CREATED);
     }

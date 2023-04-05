@@ -12,7 +12,6 @@ import com.ks.sd.api.pjt.entity.SubProjectId;
 public interface SubProjectRepository extends JpaRepository<SubProject, SubProjectId> {
     Optional<List<SubProject>> findByProject(Project project);
     Integer countByProject(Project project);
-    Optional<List<SubProject>> findByProjectAndDelYn(Project project, String delYn);
     Optional<SubProject> findByProjectAndSubPjtNo(Project project, Integer subPjtNo);
     void deleteByProject(Project project);
 }

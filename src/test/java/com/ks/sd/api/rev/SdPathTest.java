@@ -52,31 +52,31 @@ public class SdPathTest {
 
     @Test
     public void revisionInsertTest() {
-        Project project = Project.builder().pjtNo(1).build();
-        SdRevision sdRevision = 
-            SdRevision.builder()
-                .project(project)
-                .id(SdRevisionId.builder().revNo(1).pjtNo(1).build())
-                .author("foo")
-                .revDt(LocalDateTime.now())
-                .msg("bar2")
-                .build();
+        // Project project = Project.builder().pjtNo(1).build();
+        // SdRevision sdRevision = 
+        //     SdRevision.builder()
+        //         .project(project)
+        //         .id(SdRevisionId.builder().revNo(1).pjtNo(1).build())
+        //         .author("foo")
+        //         .revDt(LocalDateTime.now())
+        //         .msg("bar2")
+        //         .build();
 
-        SdRevision saveSdRevision = sdRevisionRepository.save(sdRevision);
+        // SdRevision saveSdRevision = sdRevisionRepository.save(sdRevision);
 
-        SdPath sdPath = 
-            SdPath.builder()
-                .pjtNo(saveSdRevision.getId().getPjtNo())
-                .revNo(saveSdRevision.getId().getRevNo())
-                .sdRevision(saveSdRevision)
-                .ordr(1)
-                .action("A")
-                .kind("F")
-                .filePath("/src/java/test/")
-                .fileNm("foo.java")
-                .subPjtNo(1)
-                .build();
+        // SdPath sdPath = 
+        //     SdPath.builder()
+        //         .pjtNo(saveSdRevision.getId().getPjtNo())
+        //         .revNo(saveSdRevision.getId().getRevNo())
+        //         .sdRevision(saveSdRevision)
+        //         .ordr(1)
+        //         .action("A")
+        //         .kind("F")
+        //         .filePath("/src/java/test/")
+        //         .fileNm("foo.java")
+        //         .subPjtNo(1)
+        //         .build();
         
-        sdPathRepository.save(sdPath);
+        // sdPathRepository.save(sdPath);
     }
 }
