@@ -15,9 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ks.sd.api.pjt.dto.ProjectMngResponse;
 import com.ks.sd.api.pjt.dto.ProjectSaveRequest;
-import com.ks.sd.api.pjt.dto.ProjectSaveResponse;
 import com.ks.sd.api.pjt.dto.ProjectUpdateRequest;
 import com.ks.sd.api.pjt.entity.Project;
 import com.ks.sd.api.pjt.entity.SubProject;

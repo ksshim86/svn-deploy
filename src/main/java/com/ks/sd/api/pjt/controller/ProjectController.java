@@ -16,16 +16,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ks.sd.api.appr.service.AppPrService;
-import com.ks.sd.api.pjt.dto.ProjectMngResponse;
+import com.ks.sd.api.pjt.dto.ProjectResponse;
 import com.ks.sd.api.pjt.dto.ProjectSaveRequest;
-import com.ks.sd.api.pjt.dto.ProjectSaveResponse;
-import com.ks.sd.api.pjt.dto.ProjectSearchRequest;
 import com.ks.sd.api.pjt.dto.ProjectUpdateRequest;
+import com.ks.sd.api.pjt.dto.ProjectWithSubProjectsResponse;
 import com.ks.sd.api.pjt.entity.Project;
 import com.ks.sd.api.pjt.service.ProjectService;
 
 @RestController
-@RequestMapping("/api/project")
+@RequestMapping("/api/projects")
 public class ProjectController {
     @Autowired
     private ProjectService projectService;
@@ -33,30 +32,32 @@ public class ProjectController {
     @Autowired
     private AppPrService appPrService;
     
-    @GetMapping("/search")
-    public ResponseEntity<List<ProjectMngResponse>> getProjectMngs(ProjectSearchRequest projectSearchRequest) {
-        List<ProjectMngResponse> projectMngResponses = projectService.getProjectMngs(projectSearchRequest);
+    @GetMapping("/with-sub-projects")
+    public ResponseEntity<List<ProjectWithSubProjectsResponse>> getProjectsWithSubProjects() {
+        List<ProjectWithSubProjectsResponse> responseList = projectService.getProjectsWithSubProjects();
 
-        return new ResponseEntity<>(projectMngResponses, HttpStatus.OK);
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
     
     @PostMapping
-    public ResponseEntity<ProjectMngResponse> saveProject(@RequestBody ProjectSaveRequest projectSaveRequest) throws Exception {
-        ProjectSaveResponse projectSaveResponse = projectService.saveProject(projectSaveRequest);
-        appPrService.saveAppPrs(Project.builder().pjtNo(projectSaveResponse.getPjtNo()).build());
-        ProjectMngResponse projectMngResponse =  projectService.getProjectMngResponseByPjtNo(projectSaveResponse.getPjtNo());
+    public ResponseEntity<ProjectResponse> saveProject(@RequestBody ProjectSaveRequest projectSaveRequest) throws Exception {
+        ProjectResponse projectResponse = projectService.saveProject(projectSaveRequest);
+        appPrService.saveAppPrs(Project.builder().pjtNo(projectResponse.getPjtNo()).build());
         
-        return new ResponseEntity<>(projectMngResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(projectResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping
-    public ResponseEntity<ProjectSaveResponse> updateProject(@RequestBody ProjectUpdateRequest projectUpdateRequest) {
-        ProjectSaveResponse projectSaveResponse = projectService.updateProject(projectUpdateRequest);
+    @PutMapping("/{pjtNo}")
+    public ResponseEntity<ProjectResponse> updateProject(
+        @PathVariable Integer pjtNo, @RequestBody ProjectUpdateRequest projectUpdateRequest
+    ) {
+        projectUpdateRequest.setPjtNo(pjtNo);
+        ProjectResponse projectResponse = projectService.updateProject(projectUpdateRequest);
 
-        return new ResponseEntity<>(projectSaveResponse, HttpStatus.OK);
+        return new ResponseEntity<>(projectResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping("{pjtNo}")
+    @DeleteMapping("/{pjtNo}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProject(@PathVariable Integer pjtNo) {
         projectService.deleteProject(pjtNo);

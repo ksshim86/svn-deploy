@@ -94,7 +94,6 @@ public class Project extends BaseEntity {
         this.svnUsername = projectUpdateRequest.getSvnUsername();
         this.svnPassword = projectUpdateRequest.getSvnPassword();
         this.dcr = projectUpdateRequest.getDcr();
-        this.startedYn = projectUpdateRequest.getStartedYn();
     }
 
     // 프로젝트 시작시 수정
@@ -111,9 +110,6 @@ public class Project extends BaseEntity {
         this.svnUsername = projectUpdateRequest.getSvnUsername();
         this.svnPassword = projectUpdateRequest.getSvnPassword();
         this.dcr = projectUpdateRequest.getDcr();
-        this.startedYn = projectUpdateRequest.getStartedYn();
-        this.rcsSt = projectUpdateRequest.getRcsSt();
-        this.dpSt = projectUpdateRequest.getDpSt();
     }
 
     public void updateRcsSt(String rcsSt) {

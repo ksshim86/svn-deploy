@@ -1,7 +1,5 @@
 package com.ks.sd.api.pjt.dto;
 
-import java.util.List;
-
 import com.ks.sd.api.pjt.entity.Project;
 
 import lombok.Builder;
@@ -10,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ProjectMngResponse {
+public class ProjectResponse {
     private Integer pjtNo;
     private String pjtKey;
     private String pjtNm;
@@ -22,10 +20,9 @@ public class ProjectMngResponse {
     private String startedYn;
     private String rcsSt;
     private String dpSt;
-    private List<SubProjectMngResponse> subPjtMngResponses;
 
     @Builder
-    public ProjectMngResponse(Project project, List<SubProjectMngResponse> subPjtMngResponses) {
+    public ProjectResponse(Project project) {
         this.pjtNo = project.getPjtNo();
         this.pjtKey = project.getPjtKey();
         this.pjtNm = project.getPjtNm();
@@ -37,7 +34,5 @@ public class ProjectMngResponse {
         this.startedYn = project.getStartedYn();
         this.rcsSt = project.getRcsSt();
         this.dpSt = project.getDpSt();
-
-        this.subPjtMngResponses = subPjtMngResponses;
     }
 }

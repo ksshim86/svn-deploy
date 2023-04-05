@@ -18,7 +18,6 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ks.sd.api.pjt.dto.SubProjectSaveResponse;
 import com.ks.sd.api.rev.entity.SdPath;
 import com.ks.sd.base.entity.BaseTimeEntity;
 
@@ -52,12 +51,4 @@ public class SubProject extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "subProject")
     private List<SdPath> sdPaths;
-
-    public SubProjectSaveResponse update(SubProject subProject) {
-        this.subPjtNm = subProject.getSubPjtNm();
-
-        return SubProjectSaveResponse.builder()
-            .subProject(this)
-            .build();
-    }
 }

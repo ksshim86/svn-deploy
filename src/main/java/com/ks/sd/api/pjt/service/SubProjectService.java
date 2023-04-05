@@ -10,13 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ks.sd.api.pjt.dto.SubProjectMngResponse;
+import com.ks.sd.api.pjt.dto.SubProjectResponse;
 import com.ks.sd.api.pjt.dto.SubProjectSaveRequest;
-import com.ks.sd.api.pjt.dto.SubProjectSaveResponse;
-import com.ks.sd.api.pjt.dto.SubProjectUpdateRequest;
 import com.ks.sd.api.pjt.entity.Project;
 import com.ks.sd.api.pjt.entity.SubProject;
-import com.ks.sd.api.pjt.entity.SubProjectId;
 import com.ks.sd.api.pjt.repository.SubProjectRepository;
 import com.ks.sd.api.rev.entity.SdPath;
 import com.ks.sd.api.rev.service.SdPathService;
@@ -37,8 +34,13 @@ public class SubProjectService {
     @Autowired
     private SdPathService sdPathService;
 
-    public List<SubProjectMngResponse> getSubProjects(Integer pjtNo) {
-        List<SubProjectMngResponse> subProjectMngResponses = new ArrayList<>();
+    /**
+     * 서브 프로젝트 목록 조회
+     * @param pjtNo
+     * @return
+     */
+    public List<SubProjectResponse> getSubProjects(Integer pjtNo) {
+        List<SubProjectResponse> subProjectResponseList = new ArrayList<>();
         
         Optional<List<SubProject>> optSubProjects =
             subProjectRepository.findByProject(
@@ -47,16 +49,21 @@ public class SubProjectService {
         
         optSubProjects.ifPresent(subProjects -> {
             subProjects.forEach(subProject -> {
-                SubProjectMngResponse subProjectMngResponse
-                    = SubProjectMngResponse.builder().subProject(subProject).build();
-                    subProjectMngResponses.add(subProjectMngResponse);
+                SubProjectResponse subProjectResponse
+                    = SubProjectResponse.builder().subProject(subProject).build();
+                    subProjectResponseList.add(subProjectResponse);
             });
         });
 
-        return subProjectMngResponses;
+        return subProjectResponseList;
     }
 
-    public SubProjectSaveResponse save(SubProjectSaveRequest subProjectSaveRequest) {
+    /**
+     * 서브 프로젝트 저장
+     * @param subProjectSaveRequest
+     * @return
+     */
+    public SubProjectResponse save(SubProjectSaveRequest subProjectSaveRequest) {
         final String STARTED = "Y";
         final String COMPLETION = "N";
 
@@ -68,9 +75,10 @@ public class SubProjectService {
         // 프로젝트 조회
         Project project = projectService.getProjectByPjtNo(pjtNo);
         
-        // 서브 프로젝트 이름 중복 확인
+        // 서브 프로젝트 조회
         Optional<List<SubProject>> optSubProjects = subProjectRepository.findByProject(project);
-
+        
+        // 서브 프로젝트 이름 중복 확인
         optSubProjects.ifPresent(subProjects -> {
             subProjects.forEach(subProject -> {
                 if (subProject.getSubPjtNm().equals(subProjectSaveRequest.getSubPjtNm())) {
@@ -96,31 +104,36 @@ public class SubProjectService {
                 project = projectService.getProjectByPjtNo(pjtNo);
             }
 
-            // 리비전 수집 시작 상태 업데이트
-            projectService.updateProjectByRcsSt(pjtNo, STARTED);
+            try {
+                // 리비전 수집 시작 상태 업데이트
+                projectService.updateProjectByRcsSt(pjtNo, STARTED);
+    
+                // 서브 프로젝트 번호가 없는 파일 조회
+                List<SdPath> sdPaths = sdPathService.getSdPathsByPjtNoAndSubPjtNoIsNull(pjtNo);
+    
+                sdPaths.forEach(sdPath -> {
+                    // 서브 프로젝트 조건 확인
+                    int subPjtNo = checkSubProjectConditions(subProject, sdPath.getFilePath(), sdPath.getFileNm());
+    
+                    // 서브 프로젝트에 해당하는 파일이면 서브 프로젝트 번호 업데이트
+                    if (subPjtNo != -1) {
+                        LOGGER.info(
+                            "Updated subPjtNo({}): pjtNo={}, revNo={}, action={}, filePath={}, fileNm={}",
+                            subPjtNo, pjtNo, sdPath.getId().getRevNo(), sdPath.getAction(), sdPath.getFilePath(), sdPath.getFileNm()
+                        );
+                        sdPath.updateSubPjtNo(subPjtNo);
+                    }
+                });
+            } catch (Exception e) {
+                throw new BusinessException(ErrorCode.SVR_CMM_ERROR);
+            } finally {
+                // 리비전 수집 완료 상태 업데이트
+                projectService.updateProjectByRcsSt(pjtNo, COMPLETION);
+            }
 
-            // 서브 프로젝트 번호가 없는 파일 조회
-            List<SdPath> sdPaths = sdPathService.getSdPathsByPjtNoAndSubPjtNoIsNull(pjtNo);
-
-            sdPaths.forEach(sdPath -> {
-                // 서브 프로젝트 조건 확인
-                int subPjtNo = checkSubProjectConditions(subProject, sdPath.getFilePath(), sdPath.getFileNm());
-
-                // 서브 프로젝트에 해당하는 파일이면 서브 프로젝트 번호 업데이트
-                if (subPjtNo != -1) {
-                    LOGGER.info(
-                        "Updated subPjtNo({}): pjtNo={}, revNo={}, action={}, filePath={}, fileNm={}",
-                        subPjtNo, pjtNo, sdPath.getId().getRevNo(), sdPath.getAction(), sdPath.getFilePath(), sdPath.getFileNm()
-                    );
-                    sdPath.updateSubPjtNo(subPjtNo);
-                }
-            });
-
-            // 리비전 수집 완료 상태 업데이트
-            projectService.updateProjectByRcsSt(pjtNo, COMPLETION);
         }
 
-        return SubProjectSaveResponse.builder().subProject(subProject).build();
+        return SubProjectResponse.builder().subProject(subProject).build();
     }
 
     // 서브 프로젝트 조건 확인
@@ -135,17 +148,5 @@ public class SubProjectService {
         }
 
         return -1;
-    }
-
-    public SubProjectSaveResponse update(SubProjectUpdateRequest subProjectUpdateRequest) {
-        SubProjectId subProjectId = 
-            SubProjectId.builder()
-            .project(subProjectUpdateRequest.getPjtNo())
-            .subPjtNo(subProjectUpdateRequest.getSubPjtNo()).build();
-
-        SubProject subProject = subProjectRepository.findById(subProjectId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.UPDATE_TARGET_NOT_FOUND));
-            
-        return subProject.update(subProjectUpdateRequest.toEntity());
     }
 }

@@ -175,7 +175,6 @@ public class SvnRepositoryUtil {
                 }
             } catch (SVNException e) {
                 // exception이 발생했다면 생성되어 있지 않은 branch이기 때문에 문제없음.
-                LOGGER.debug(e.toString());
             }
 
             SVNCopySource[] sources = new SVNCopySource[] {

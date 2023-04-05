@@ -8,8 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.ks.sd.api.pjt.dto.ProjectMngResponse;
+import com.ks.sd.api.pjt.dto.ProjectResponse;
 import com.ks.sd.api.pjt.service.ProjectService;
+import com.ks.sd.consts.SdConstants;
 
 @Component
 public class SvnHistoryLoaderSchd {
@@ -26,18 +27,15 @@ public class SvnHistoryLoaderSchd {
 
     @Scheduled(fixedRate = 30000)
     public void performTask() {
-        final String UNDELETED = "N";
-        final String INACTIVE = "N";
-        final String STARTED = "Y";
-        final String COMPLETION = "N";
-
         // 삭제되지 않고, 프로젝트가 시작되었고, 배포가 진행중이지 않고, 리비전 수집이 시작이 아닌 프로젝트 조회
         // 리비전 수집 상태도 확인하는 이유는 서브 프로젝트 등록 시, 리비전 수집 상태를 시작으로 업데이트 하기 때문에
-        List<ProjectMngResponse> projectMngResponses =
-            projectService.getProjectsByDelYnAndDpStAndStartedYnAndRcsSt(UNDELETED, INACTIVE, STARTED, COMPLETION);
+        List<ProjectResponse> projectResponses =
+            projectService.getProjectsByDelYnAndDpStAndStartedYnAndRcsSt(
+                SdConstants.UNDELETED, SdConstants.INACTIVE, SdConstants.STARTED, SdConstants.COMPLETION
+            );
 
         // 프로젝트별 스레드 실행
-        projectMngResponses.stream().forEach(projectMngResponse -> {
+        projectResponses.stream().forEach(projectMngResponse -> {
             Integer pjtNo = projectMngResponse.getPjtNo();
             // 스레드가 실행중이지 않거나, 스레드가 종료된 경우에만 실행
             if (

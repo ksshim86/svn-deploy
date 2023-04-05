@@ -18,9 +18,6 @@ public class ProjectUpdateRequest extends BaseRequest {
     private String svnUsername;
     private String svnPassword;
     private Long dcr;
-    private String startedYn;
-    private String rcsSt;
-    private String dpSt;
 
     public Project toEntity() {
         return Project.builder()
@@ -31,9 +28,6 @@ public class ProjectUpdateRequest extends BaseRequest {
             .svnUsername(svnUsername)
             .svnPassword(svnPassword)
             .delYn(getDelYn())
-            .dcr(dcr)
-            .startedYn(startedYn)
-            .rcsSt(rcsSt)
-            .dpSt(dpSt).build();
+            .dcr(dcr).build();
     }
 }
