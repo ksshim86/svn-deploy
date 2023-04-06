@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,12 +33,22 @@ public class ProjectController {
     @Autowired
     private AppPrService appPrService;
     
+    @GetMapping
+    public ResponseEntity<List<ProjectResponse>> searchProjects(
+        @RequestParam(required = false) String delYn
+    ) {
+        List<ProjectResponse> responses =  projectService.searchProjects(delYn);
+
+        return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
+
     @GetMapping("/with-sub-projects")
     public ResponseEntity<List<ProjectWithSubProjectsResponse>> getProjectsWithSubProjects() {
-        List<ProjectWithSubProjectsResponse> responseList = projectService.getProjectsWithSubProjects();
+        List<ProjectWithSubProjectsResponse> responses = projectService.getProjectsWithSubProjects();
 
-        return new ResponseEntity<>(responseList, HttpStatus.OK);
+        return new ResponseEntity<>(responses, HttpStatus.OK);
     }
+
     
     @PostMapping
     public ResponseEntity<ProjectResponse> saveProject(@RequestBody ProjectSaveRequest projectSaveRequest) throws Exception {

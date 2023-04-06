@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,29 @@ public class ProjectService {
 
     @Autowired
     private AppPrRepository appPrRepository;
+
+    /**
+     * 프로젝트 검색
+     * @param delYn
+     * @return
+     */
+    @Transactional
+    public List<ProjectResponse> searchProjects(String delYn) {
+        Specification<Project> spec = (root, query, criteriaBuilder) -> null;
+
+        if (delYn != null && !delYn.isEmpty()) {
+            spec = Specification.where((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("delYn"), delYn));
+        }
+
+        List<Project> projects = projectRepository.findAll(spec);
+
+        List<ProjectResponse> responses = 
+            projects.stream()
+            .map(project -> ProjectResponse.builder().project(project).build())
+            .collect(Collectors.toList());
+        
+        return responses;
+    }
 
     /**
      * 프로젝트 목록(서브 프로젝트 포함) 조회
