@@ -6,6 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    SD_INFO_ALREADY_EXIST("I001", "SD 정보가 이미 존재합니다."),
+    
     SVN_DEV_REPO_REFUSED("S001", "개발 SVN 저장소 연결 실패"),
     SVN_DP_REPO_REFUSED("S002", "배포 SVN 저장소 연결 실패"),
     SVN_REPO_CHECKOUT_FAILED("S003", "SVN checkout 실패"),
