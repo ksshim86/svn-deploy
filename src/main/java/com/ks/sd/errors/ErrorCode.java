@@ -27,7 +27,8 @@ public enum ErrorCode {
 
     PJT_NOT_FOUND("P001", "프로젝트가 존재하지 않습니다."),
     PJT_ST_STARTED("P002", "프로젝트의 리비전 수집 상태 또는 배포 상태가 진행 중입니다."),
-    SUB_PJT_NM_DUPLICATION("P003", "서브 프로젝트 이름이 중복됩니다."),
+    SUB_PJT_NOT_FOUND("P003", "서브 프로젝트가 존재하지 않습니다."),
+    SUB_PJT_NM_DUPLICATION("P004", "서브 프로젝트 이름이 중복됩니다."),
 
     USER_NOT_FOUND("U001", "사용자가 존재하지 않습니다."),
     USER_ALREADY_EXISTS("U002", "사용자가 이미 존재합니다."),
