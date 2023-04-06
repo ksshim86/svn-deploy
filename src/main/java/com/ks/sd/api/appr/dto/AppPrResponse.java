@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppPrView {
+public class AppPrResponse {
     private Integer pjtNo;
     private Integer ordr;
     private String roleCd;
@@ -20,7 +20,7 @@ public class AppPrView {
     private String useYn;
 
     @Builder
-    public AppPrView(AppPr appPr) {
+    public AppPrResponse(AppPr appPr) {
         this.pjtNo = appPr.getProject().getPjtNo();
         this.ordr = appPr.getOrdr();
         this.roleCd = appPr.getRole().getRoleCd();
