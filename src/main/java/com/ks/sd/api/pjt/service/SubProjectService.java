@@ -1,8 +1,8 @@
 package com.ks.sd.api.pjt.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +17,7 @@ import com.ks.sd.api.pjt.entity.SubProject;
 import com.ks.sd.api.pjt.repository.SubProjectRepository;
 import com.ks.sd.api.rev.entity.SdPath;
 import com.ks.sd.api.rev.service.SdPathService;
+import com.ks.sd.consts.SdConstants;
 import com.ks.sd.errors.ErrorCode;
 import com.ks.sd.errors.exception.BusinessException;
 
@@ -37,25 +38,17 @@ public class SubProjectService {
     /**
      * 서브 프로젝트 목록 조회
      * @param pjtNo
-     * @return
+     * @return List<SubProjectResponse>
      */
-    public List<SubProjectResponse> getSubProjects(Integer pjtNo) {
-        List<SubProjectResponse> subProjectResponseList = new ArrayList<>();
+    public List<SubProjectResponse> getSubProjectsByPjtNo(Integer pjtNo) {
+        List<SubProject> subProjects =
+            subProjectRepository.findByProject(Project.builder().pjtNo(pjtNo).build())
+                .orElseThrow(() -> new BusinessException(ErrorCode.SUB_PJT_NOT_FOUND));
         
-        Optional<List<SubProject>> optSubProjects =
-            subProjectRepository.findByProject(
-                Project.builder().pjtNo(pjtNo).build()
-            );
-        
-        optSubProjects.ifPresent(subProjects -> {
-            subProjects.forEach(subProject -> {
-                SubProjectResponse subProjectResponse
-                    = SubProjectResponse.builder().subProject(subProject).build();
-                    subProjectResponseList.add(subProjectResponse);
-            });
-        });
-
-        return subProjectResponseList;
+        return 
+            subProjects.stream()
+                .map(subProject -> SubProjectResponse.builder().subProject(subProject).build())
+                .collect(Collectors.toList());
     }
 
     /**
@@ -93,9 +86,15 @@ public class SubProjectService {
         // 프로젝트 시작 여부 확인
         if (STARTED.equals(project.getStartedYn())) {
             // 리비전 수집 상태(rcs_st)와 배포 상태(dp_st)가 N일때 까지 대기
-            while ("Y".equals(project.getRcsSt()) || "Y".equals(project.getDpSt())) {
+            while (
+                SdConstants.COLLECTING.equals(project.getRcsSt()) ||
+                SdConstants.ACTIVE.equals(project.getDpSt())
+            ) {
                 try {
-                    LOGGER.info("Waiting for rcs_st and dp_st to be N: rcsSt={}, dpSt={}", project.getRcsSt(), project.getDpSt());
+                    LOGGER.info(
+                        "Waiting for rcs_st and dp_st to be N: rcsSt={}, dpSt={}",
+                        project.getRcsSt(), project.getDpSt()
+                    );
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     throw new BusinessException(ErrorCode.PJT_ST_STARTED);

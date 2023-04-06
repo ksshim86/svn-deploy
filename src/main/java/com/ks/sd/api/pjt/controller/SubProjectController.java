@@ -26,9 +26,9 @@ public class SubProjectController {
 
     @GetMapping("/{pjtNo}/sub-projects")
     public ResponseEntity<List<SubProjectResponse>> getSubProjectsByPjtNo(@PathVariable Integer pjtNo) {
-        List<SubProjectResponse> subProjectMngResponses = subProjectService.getSubProjects(pjtNo);
+        List<SubProjectResponse> responses = subProjectService.getSubProjectsByPjtNo(pjtNo);
         
-        return new ResponseEntity<>(subProjectMngResponses, HttpStatus.OK);
+        return new ResponseEntity<>(responses, HttpStatus.OK);
     }
 
     @PostMapping("/{pjtNo}/sub-projects")
