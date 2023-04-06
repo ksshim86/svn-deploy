@@ -56,6 +56,10 @@ public class AppPr extends BaseEntity {
     @Column(nullable = false, columnDefinition = "CHAR(1) default 'N'")
     private String useYn;
 
+    /**
+     * 승인 절차 사용 여부 수정
+     * @param useYn 승인 절차 사용 여부
+     */
     public void updateUseYn(String useYn) {
         this.useYn = useYn;
     }
