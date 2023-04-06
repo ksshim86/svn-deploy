@@ -10,12 +10,12 @@ spring:
   jpa:  
     database-platform: org.hibernate.dialect.MariaDB103Dialect
     open-in-view: false
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
-        "[format_sql]": false
+        "[format_sql]": true
     # ddl script 파일 생성
       javax:
         persistence:
@@ -28,11 +28,10 @@ spring:
 # log4j2
 logging:
   config: classpath:log4j2.xml
-  # 쿼리 바인딩 파라미터를 보여준다.
   level:
     org:
+      springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener: OFF
       hibernate:
         type:
           descriptor:
-            sql: info
-  
+            sql: debug # 쿼리 바인딩 파라미터를 보여준다.
