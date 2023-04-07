@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeployView extends BaseResponse {
+public class DeployResponse extends BaseResponse {
     private Integer dpNo;
     private Integer pjtNo;
     private String dpTitle;
@@ -25,7 +25,7 @@ public class DeployView extends BaseResponse {
     private LocalDateTime deadlineDt;
 
     @Builder
-    public DeployView(Deploy deploy) {
+    public DeployResponse(Deploy deploy) {
         this.dpNo = deploy.getDpNo();
         this.pjtNo = deploy.getProject().getPjtNo();
         this.dpTitle = deploy.getDpTitle();

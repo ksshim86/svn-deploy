@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.ks.sd.api.dp.dto.DeployUpdateRequest;
 import com.ks.sd.api.pjt.entity.Project;
 import com.ks.sd.base.entity.BaseEntity;
+import com.ks.sd.consts.SdConstants;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,6 +60,10 @@ public class Deploy extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime deadlineDt;
 
+    /**
+     * 배포일정을 수정합니다.
+     * @param deployUpdateRequest 수정할 배포일정 정보
+     */
     public void update(DeployUpdateRequest deployUpdateRequest) {
         this.dpTitle = deployUpdateRequest.getDpTitle();
         this.dpDiv = deployUpdateRequest.getDpDiv();
@@ -66,12 +71,18 @@ public class Deploy extends BaseEntity {
         this.deadlineDt = deployUpdateRequest.getDeadlineDt();
     }
 
+    /**
+     * 배포 상태를 변경합니다.
+     * @param dpSt 배포 상태
+     */
     public void updateDpSt(String dpSt) {
         this.dpSt = dpSt;
     }
 
+    /**
+     * 배포일정을 삭제합니다.
+     */
     public void delete() {
-        final String DELETE = "Y";
-        this.delYn = DELETE;
+        this.delYn = SdConstants.DELETED;
     }
 }

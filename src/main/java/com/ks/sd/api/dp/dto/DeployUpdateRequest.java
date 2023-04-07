@@ -5,14 +5,13 @@ import java.time.LocalDateTime;
 import com.ks.sd.api.dp.entity.Deploy;
 import com.ks.sd.api.pjt.entity.Project;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class DeployUpdateRequest {
+    private Integer dpNo;
     private Integer pjtNo;
     private String dpTitle;
     private String dpDiv;
@@ -21,6 +20,7 @@ public class DeployUpdateRequest {
 
     public Deploy toEntity() {
         return Deploy.builder()
+            .dpNo(dpNo)
             .project(Project.builder().pjtNo(pjtNo).build())
             .dpTitle(dpTitle)
             .dpDiv(dpDiv)
