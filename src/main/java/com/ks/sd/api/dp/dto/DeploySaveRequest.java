@@ -5,12 +5,10 @@ import java.time.LocalDateTime;
 import com.ks.sd.api.dp.entity.Deploy;
 import com.ks.sd.api.pjt.entity.Project;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class DeploySaveRequest {
     private Integer pjtNo;
