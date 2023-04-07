@@ -47,9 +47,9 @@ public class ProjectService {
     private AppPrRepository appPrRepository;
 
     /**
-     * 프로젝트 검색
-     * @param delYn
-     * @return
+     * 프로젝트 목록을 검색합니다.
+     * @param delYn 삭제 여부(선택사항)
+     * @return 검색된 프로젝트 목록에 대한 {@link ProjectResponse} 리스트
      */
     @Transactional
     public List<ProjectResponse> searchProjects(String delYn) {
