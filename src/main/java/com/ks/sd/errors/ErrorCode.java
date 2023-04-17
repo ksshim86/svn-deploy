@@ -34,7 +34,8 @@ public enum ErrorCode {
 
     USER_NOT_FOUND("U001", "사용자가 존재하지 않습니다."),
     USER_ALREADY_EXISTS("U002", "사용자가 이미 존재합니다."),
-
+    USER_NOT_IN_TEAM("U003", "사용자가 팀에 속해있지 않습니다."),
+    
     TEAM_NOT_FOUND("T001", "팀이 존재하지 않습니다."),
 
     ROLE_NOT_FOUND("R001", "권한이 존재하지 않습니다."),

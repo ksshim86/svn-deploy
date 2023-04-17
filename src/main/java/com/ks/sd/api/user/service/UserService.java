@@ -1,7 +1,6 @@
 package com.ks.sd.api.user.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -9,16 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ks.sd.api.user.dto.UserView;
-import com.ks.sd.api.role.dto.RoleView;
-import com.ks.sd.api.role.entity.Role;
-import com.ks.sd.api.role.service.RoleService;
+import com.ks.sd.api.user.dto.UserResponse;
+import com.ks.sd.api.role.dto.RoleResponse;
+import com.ks.sd.api.team.dto.TeamResponse;
 import com.ks.sd.api.user.dto.UserSaveRequest;
 import com.ks.sd.api.user.dto.UserUpdateRequest;
 import com.ks.sd.api.user.entity.User;
-import com.ks.sd.api.user.entity.UserRole;
 import com.ks.sd.api.user.repository.UserRepository;
-import com.ks.sd.api.user.repository.UserRoleRepository;
 import com.ks.sd.errors.ErrorCode;
 import com.ks.sd.errors.exception.BusinessException;
 
@@ -28,147 +24,104 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private RoleService roleService;
-
-    @Autowired
-    private UserRoleRepository userRoleRepository;
-
     /**
-     * 모든 사용자 조회
-     * @return
+     * 모든 사용자를 조회합니다.
+     * @return 모든 사용자 목록 {@link UserResponse}
      */
-    public List<UserView> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        List<UserView> allUsersList = users.stream()
-            .map(user -> UserView.builder().user(user).build())
-            .collect(Collectors.toList());
-
-        return allUsersList;
-    }
-
-    /**
-     * 삭제여부로 사용자 조회
-     * @param delYn
-     * @return
-     */
-    public List<UserView> getUsersByDelYn(String delYn) {
-        List<User> users = userRepository.findByDelYn(delYn).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        List<UserView> allUsersList = users.stream()
-                .map(user -> UserView.builder().user(user).build())
+    public List<UserResponse> getAllUsers() {
+        return 
+            userRepository.findAll().stream()
+                .map(user -> UserResponse.builder().user(user).build())
                 .collect(Collectors.toList());
-
-        return allUsersList;
     }
-    
+
     /**
-     * 사용자 아이디로 사용자 조회
-     * @param userId
-     * @return
+     * 사용자 아이디로 사용자를 조회합니다.
+     * @param userId 사용자 아이디
+     * @return 사용자 {@link User}
      */
     public User getUserByUserId(String userId) {
-        User user = userRepository.findByUserId(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        return user;
+        return 
+            userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     /**
-     * 사용자 등록
-     * @param userSaveRequest
-     * @return
+     * 사용자 아이디로 사용자를 조회합니다.
+     * @param userId 사용자 아이디
+     * @return 사용자 {@link UserResponse}
      */
-    public User saveUser(UserSaveRequest userSaveRequest) {
-        Optional<User> optionalUser = userRepository.findByUserId(userSaveRequest.getUserId());
-
-        if (optionalUser.isPresent()) {
-            throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
-        } else {
-            // 비밀번호 초기화, BCryptPasswordEncoder 사용하여 암호화 개발 필요
-            userSaveRequest.setPassword("1234");
-            
-            return userRepository.save(userSaveRequest.toEntity());
-        }
+    public UserResponse getUserResponseByUserId(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        return UserResponse.builder().user(user).build();
     }
 
     /**
-     * 사용자 수정
-     * @param userId
-     * @param userUpdateRequest
-     * @return
+     * 사용자를 등록합니다.
+     * @param userSaveRequest 사용자 등록 요청
+     * @return 등록된 사용자 {@link UserResponse}
      */
-    public User updateUser(String userId, UserUpdateRequest userUpdateRequest) {
-        User user = this.getUserByUserId(userId);
+    public UserResponse saveUser(UserSaveRequest userSaveRequest) {
+        userRepository.findByUserId(userSaveRequest.getUserId())
+            .ifPresent(user -> {
+                throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
+            });
+
+        // 비밀번호 초기화, BCryptPasswordEncoder 사용하여 암호화 개발 필요
+        userSaveRequest.setPassword("1234");
+        User saveUser = userRepository.save(userSaveRequest.toEntity());
+
+        return UserResponse.builder().user(saveUser).build();
+    }
+
+    /**
+     * 사용자를 수정합니다.
+     * @param userUpdateRequest 사용자 수정 요청
+     * @return 수정된 사용자 {@link UserResponse}
+     */
+    public UserResponse updateUser(UserUpdateRequest userUpdateRequest) {
+        User user = this.getUserByUserId(userUpdateRequest.getUserId());
         user.update(userUpdateRequest);
         
-        return userRepository.save(user);
+        return UserResponse.builder().user(user).build();
     }
 
     /**
-     * 사용자 삭제
-     * @param userId
+     * 사용자를 삭제합니다.
+     * @param userId 사용자 아이디
      */
     public void deleteUser(String userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        user.deleteUser();
+        user.delete();
     }
 
     /**
-     * 팀번호로 사용자 조회
-     * @param teamNo
-     * @return
+     * 사용자의 팀을 조회합니다.
+     * @param userId 사용자 아이디
+     * @return 사용자의 팀 {@link TeamResponse}
      */
-    public List<UserView> getUsersByTeam(Integer teamNo) {
-        List<User> users =
-            userRepository.findByTeamTeamNo(teamNo).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        
-        List<UserView> userViewList = users.stream()
-            .map(user -> UserView.builder().user(user).build())
-            .collect(Collectors.toList());
-
-        return userViewList;
-    }
-
-    /**
-     * 사용자의 권한 조회
-     * @param userId
-     * @return
-     */
-    public List<RoleView> getRolesByUserId(String userId) {
+    public TeamResponse getTeamByUserId(String userId) {
         User user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        List<UserRole> userRoles = user.getUserRoles();
-        List<RoleView> roleViews = userRoles.stream()
-            .map(userRole -> RoleView.builder().role(userRole.getRole()).build())
-            .collect(Collectors.toList());
-
-        return roleViews;
+        return TeamResponse.builder().team(user.getTeam()).build();
     }
 
     /**
-     * 사용자의 권한 삭제
-     * @param userId
-     * @param roleCd
+     * 사용자의 권한들을 조회합니다.
+     * @param userId 사용자 아이디
+     * @return 사용자의 권한 목록 {@link RoleResponse}
      */
-    public void deleteRoleByUserId(String userId, String roleCd) {
+    public List<RoleResponse> getRolesByUserId(String userId) {
         User user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        Role role = roleService.getRoleByRoleCd(roleCd);
 
-        List<UserRole> userRoles = user.getUserRoles();
-        boolean alreadyHasRole = userRoles.stream().anyMatch(ur -> ur.getRole().equals(role));
+        List<RoleResponse> responses = user.getUserRoles().stream()
+            .map(userRole -> RoleResponse.builder().role(userRole.getRole()).build())
+            .collect(Collectors.toList());
 
-        if (!alreadyHasRole) {
-            throw new BusinessException(ErrorCode.USER_NOT_HAS_ROLE);
-        }
-
-        UserRole userRole = userRoles.stream()
-            .filter(ur -> ur.getRole().equals(role))
-            .findFirst()
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_HAS_ROLE));
-
-        userRoleRepository.delete(userRole);
+        return responses;
     }
 }

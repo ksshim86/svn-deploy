@@ -43,6 +43,10 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     private List<UserRole> userRoles;
 
+    /**
+     * 사용자를 수정합니다.
+     * @param userUpdateRequest 사용자 수정 요청
+     */
     public void update(UserUpdateRequest userUpdateRequest) {
         if (userUpdateRequest.getUserNm() != null) {
             this.userNm = userUpdateRequest.getUserNm();
@@ -50,11 +54,6 @@ public class User extends BaseEntity {
         if (userUpdateRequest.getPassword() != null) {
             this.password = userUpdateRequest.getPassword();
         }
-    }
-
-    public void deleteUser() {
-        final String DELETE = "Y";
-        this.delYn = DELETE;
     }
 
     public void setTeam(Team team) {

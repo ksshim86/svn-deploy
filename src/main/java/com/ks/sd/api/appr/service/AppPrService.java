@@ -14,7 +14,7 @@ import com.ks.sd.api.appr.entity.AppPr;
 import com.ks.sd.api.appr.entity.AppPr.AppPrId;
 import com.ks.sd.api.appr.repository.AppPrRepository;
 import com.ks.sd.api.pjt.entity.Project;
-import com.ks.sd.api.role.dto.RoleView;
+import com.ks.sd.api.role.dto.RoleResponse;
 import com.ks.sd.api.role.entity.Role;
 import com.ks.sd.api.role.service.RoleService;
 import com.ks.sd.errors.ErrorCode;
@@ -53,15 +53,15 @@ public class AppPrService {
      * @return 저장된 승인 절차를 나타내는 AppPrResponse 인스턴스의 목록을 반환합니다.
      */
     public List<AppPrResponse> saveAppPrs(Project project) {
-        List<RoleView> roleViews = roleService.getAllRoles();
+        List<RoleResponse> roleResponses = roleService.getAllRoles();
 
         List<AppPr> appPrs = 
-            IntStream.range(0, roleViews.size())
+            IntStream.range(0, roleResponses.size())
                 .mapToObj(i -> {
-                    RoleView roleView = roleViews.get(i);
+                    RoleResponse roleResponse = roleResponses.get(i);
                     return AppPr.builder()
                         .project(project)
-                        .role(Role.builder().roleCd(roleView.getRoleCd()).build())
+                        .role(Role.builder().roleCd(roleResponse.getRoleCd()).build())
                         .ordr(i + 1)
                         .build();
                 })

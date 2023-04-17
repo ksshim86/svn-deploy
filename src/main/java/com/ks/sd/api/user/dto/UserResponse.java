@@ -11,14 +11,14 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class UserSaveResponse extends BaseResponse {
+public class UserResponse extends BaseResponse {
     private String userId;
     private String userNm;
 
     @Builder
-    public UserSaveResponse(User user) {
+    public UserResponse(User user) {
         this.userId = user.getUserId();
-        this.userNm = user.getUserNm(); 
+        this.userNm = user.getUserNm();
         this.setDelYn(user.getDelYn());
         this.setCreatedDt(user.getCreatedDt());
         this.setUpdatedDt(user.getUpdatedDt());

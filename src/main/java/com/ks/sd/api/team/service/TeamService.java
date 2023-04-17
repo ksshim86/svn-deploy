@@ -10,9 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ks.sd.api.team.dto.TeamSaveRequest;
 import com.ks.sd.api.team.dto.TeamUpdateRequest;
-import com.ks.sd.api.team.dto.TeamView;
+import com.ks.sd.api.team.dto.TeamResponse;
 import com.ks.sd.api.team.entity.Team;
 import com.ks.sd.api.team.repository.TeamRepository;
+import com.ks.sd.api.user.dto.UserResponse;
 import com.ks.sd.api.user.entity.User;
 import com.ks.sd.api.user.repository.UserRepository;
 import com.ks.sd.errors.ErrorCode;
@@ -28,31 +29,14 @@ public class TeamService {
     private UserRepository userRepository;
 
     /**
-     * 모든 팀 조회
-     * @return
+     * 모든 팀을 조회합니다.
+     * @return 모든 팀 목록 {@link TeamResponse}
      */
-    public List<TeamView> getAllTeams() {
-        List<Team> teams = teamRepository.findAll();
-        List<TeamView> allTeamsList = teams.stream()
-            .map(team -> TeamView.builder().team(team).build())
-            .collect(Collectors.toList());
-        
-        return allTeamsList;
-    }
-
-    /**
-     * 삭제여부로 팀 조회
-     * @param delYn
-     * @return
-     */
-    public List<TeamView> getTeamsByDelYn(String delYn) {
-        List<Team> teams = teamRepository.findByDelYn(delYn);
-        
-        List<TeamView> allTeamsList = teams.stream()
-                .map(team -> TeamView.builder().team(team).build())
+    public List<TeamResponse> getAllTeams() {
+        return 
+            teamRepository.findAll().stream()
+                .map(team -> TeamResponse.builder().team(team).build())
                 .collect(Collectors.toList());
-        
-        return allTeamsList;
     }
 
     /**
@@ -67,42 +51,56 @@ public class TeamService {
     }
 
     /**
-     * 팀 저장
-     * @param teamSaveRequest
-     * @return
+     * 팀을 저장합니다.
+     * @param teamSaveRequest 팀 저장 요청
+     * @return 저장된 팀 {@link TeamResponse}
      */
-    public Team saveTeam(TeamSaveRequest teamSaveRequest) {
-        return teamRepository.save(teamSaveRequest.toEntity());
+    public TeamResponse saveTeam(TeamSaveRequest teamSaveRequest) {
+        Team team = teamRepository.save(teamSaveRequest.toEntity());
+        return TeamResponse.builder().team(team).build();
     }
 
     /**
-     * 팀 수정
-     * @param teamNo
-     * @param teamUpdateRequest
-     * @return
+     * 팀을 수정합니다.
+     * @param teamUpdateRequest 팀 수정 요청
+     * @return 수정된 팀 {@link TeamResponse}
      */
-    public Team updateTeam(Integer teamNo, TeamUpdateRequest teamUpdateRequest) {
-        Team team = this.getTeamByTeamNo(teamNo);
+    public TeamResponse updateTeam(TeamUpdateRequest teamUpdateRequest) {
+        Team team = this.getTeamByTeamNo(teamUpdateRequest.getTeamNo());
         team.update(teamUpdateRequest);
         
-        return teamRepository.save(team);
+        return TeamResponse.builder().team(team).build();
     }
 
     /**
-     * 팀 삭제
-     * @param teamNo
+     * 팀을 삭제합니다.
+     * @param teamNo 팀 번호
      */
     public void deleteTeam(Integer teamNo) {
         Team team = this.getTeamByTeamNo(teamNo);
-        
-        team.deleteTeam();
-        teamRepository.save(team);
+        team.delete();
     }
 
     /**
-     * 팀에 사용자 추가
-     * @param teamNo
-     * @param userId
+     * 팀에 속한 사용자를 조회합니다.
+     * @param teamNo 팀 번호
+     * @return 팀에 속한 사용자 목록 {@link UserResponse}
+     */
+    public List<UserResponse> getUsersByTeamNo(Integer teamNo) {
+        Team team = this.getTeamByTeamNo(teamNo);
+
+        List<UserResponse> responses = 
+            team.getUsers().stream()
+                .map(user -> UserResponse.builder().user(user).build())
+                .collect(Collectors.toList());
+
+        return responses;
+    }
+
+    /**
+     * 팀에 사용자를 추가합니다.
+     * @param teamNo 팀 번호
+     * @param userId 사용자 아이디
      */
     public void addUserToTeam(Integer teamNo, String userId) {
         Team team = getTeamByTeamNo(teamNo);
@@ -112,35 +110,20 @@ public class TeamService {
     }
 
     /**
-     * 팀에서 사용자 제외
-     * @param teamNo
-     * @param userId
+     * 팀에서 사용자를 제외합니다.
+     * @param teamNo 팀 번호
+     * @param userId 사용자 아이디
      */
-    public void excludeUserFromTeam(Integer teamNo, String userId) {
+    public void removeUserFromTeam(Integer teamNo, String userId) {
         Team team = teamRepository.findById(teamNo)
             .orElseThrow(() -> new BusinessException(ErrorCode.TEAM_NOT_FOUND));
         User user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         
-        team.getUsers().remove(user);
-        user.setTeam(null);
-    }
-
-    /**
-     * 사용자의 팀 조회
-     * @param userId
-     * @return
-     */
-    public TeamView getTeamByUserId(String userId) {
-        User user = userRepository.findByUserId(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        
-        Team team = user.getTeam();
-        
-        if (team == null) {
-            throw new BusinessException(ErrorCode.TEAM_NOT_FOUND);
+        if (!team.equals(user.getTeam())) {
+            throw new BusinessException(ErrorCode.USER_NOT_IN_TEAM);
         }
-
-        return TeamView.builder().team(team).build();
+    
+        user.setTeam(null);
     }
 }

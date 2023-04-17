@@ -28,7 +28,7 @@ public abstract class BaseEntity extends BaseTimeEntity {
     protected String delYn;
 
     /**
-     * 삭제 delYn = "Y"
+     * 엔티티를 삭제합니다.
      */   
     public void delete() {
         this.delYn = "Y";

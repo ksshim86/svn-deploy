@@ -42,12 +42,11 @@ public class Team extends BaseEntity {
     @OneToMany(mappedBy = "team")
     private List<User> users;
 
+    /**
+     * 팀을 수정합니다.
+     * @param teamUpdateRequest 팀 수정 요청
+     */
     public void update(TeamUpdateRequest teamUpdateRequest) {
         this.teamNm = teamUpdateRequest.getTeamNm();
-    }
-
-    public void deleteTeam() {
-        final String DELETE = "Y";
-        this.delYn = DELETE;
     }
 }

@@ -10,11 +10,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserUpdateRequest {
+    private String userId;
     private String userNm;
     private String password;
 
     public User toEntity() {
         return User.builder()
+            .userId(userId)
             .userNm(userNm)
             .password(password).build();
     }

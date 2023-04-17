@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ks.sd.api.role.dto.RoleUpdateRequest;
-import com.ks.sd.api.role.dto.RoleView;
+import com.ks.sd.api.role.dto.RoleResponse;
 import com.ks.sd.api.role.entity.Role;
 import com.ks.sd.api.role.repository.RoleRepository;
-import com.ks.sd.api.user.dto.UserView;
+import com.ks.sd.api.user.dto.UserResponse;
 import com.ks.sd.api.user.entity.User;
 import com.ks.sd.api.user.entity.UserRole;
 import com.ks.sd.api.user.repository.UserRepository;
@@ -33,73 +33,70 @@ public class RoleService {
     private UserRoleRepository userRoleRepository;
 
     /**
-     * 모든 권한 조회
-     * @return
+     * 모든 권한을 조회합니다.
+     * @return 모든 권한 목록 {@link RoleResponse}
      */
-    public List<RoleView> getAllRoles() {
+    public List<RoleResponse> getAllRoles() {
         List<Role> roles = 
             roleRepository.findAllByOrderByRoleLvlAsc()
                 .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
-        List<RoleView> roleViews = roles.stream()
-            .map(role -> RoleView.builder().role(role).build())
+
+        List<RoleResponse> responses = roles.stream()
+            .map(role -> RoleResponse.builder().role(role).build())
             .collect(Collectors.toList());
 
-        return roleViews;
+        return responses;
     }
 
     /**
-     * 권한코드로 권한 조회
-     * @param roleCd
-     * @return
+     * 권한코드에 해당하는 권한을 조회합니다.
+     * @param roleCd 권한코드
+     * @return 권한 {@link Role}
      */
     public Role getRoleByRoleCd(String roleCd) {
-        Role role = roleRepository.findByRoleCd(roleCd).orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
-
-        return role;
+        return 
+            roleRepository.findByRoleCd(roleCd)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
     }
 
     /**
-     * 권한 수정
-     * @param roleCd
+     * 권한을 수정합니다.
      * @param roleUpdateRequest
-     * @return
+     * @return 수정된 권한 {@link RoleResponse}
      */
-    public Role updateRole(String roleCd, RoleUpdateRequest roleUpdateRequest) {
-        Role role = this.getRoleByRoleCd(roleCd);
+    public RoleResponse updateRole(RoleUpdateRequest roleUpdateRequest) {
+        Role role = this.getRoleByRoleCd(roleUpdateRequest.getRoleCd());
         role.update(roleUpdateRequest);
 
-        return roleRepository.save(role);
+        return RoleResponse.builder().role(role).build();
     }
 
     /**
-     * 권한에 속한 사용자 조회
-     * @param roleCd
-     * @return
+     * 권한에 속한 사용자들을 조회합니다.
+     * @param roleCd 권한코드
+     * @return 사용자 목록 {@link UserResponse}
      */
-    public List<UserView> getUsersByRole(String roleCd) {
+    public List<UserResponse> getUsersByRole(String roleCd) {
         Role role = this.getRoleByRoleCd(roleCd);
         List<UserRole> userRoles = role.getUserRoles();
 
-        List<UserView> roleViews = userRoles.stream()
-                .map(userRole -> UserView.builder().user(userRole.getUser()).build())
-                .filter(userView -> !userView.isDeleted())
+        return 
+            userRoles.stream()
+                .map(userRole -> UserResponse.builder().user(userRole.getUser()).build())
                 .collect(Collectors.toList());
-
-        return roleViews;
     }
 
     /**
-     * 권한에 사용자 추가
-     * @param roleCd
-     * @param userId
+     * 권한에 사용자를 추가합니다.
+     * @param roleCd 권한코드
+     * @param userId 사용자 아이디
      */
     public void addUserToRole(String roleCd, String userId) {
         Role role = this.getRoleByRoleCd(roleCd);
         User user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         
-        List<UserRole> userRoles = user.getUserRoles();
-        boolean alreadyHasRole = userRoles.stream().anyMatch(ur -> ur.getRole().equals(role));
+        boolean alreadyHasRole = user.getUserRoles().stream().anyMatch(ur -> ur.getRole().equals(role));
 
         if (alreadyHasRole) {
             throw new BusinessException(ErrorCode.USER_ALREADY_HAS_ROLE);
@@ -111,23 +108,16 @@ public class RoleService {
     }
 
     /**
-     * 권한에 사용자 삭제
-     * @param roleCd
-     * @param userId
+     * 권한에 속한 사용자를 제외합니다.
+     * @param roleCd 권한코드
+     * @param userId 사용자 아이디
      */
-    public void deleteUserFromRole(String roleCd, String userId) {
+    public void removeUserFromRole(String roleCd, String userId) {
         Role role = this.getRoleByRoleCd(roleCd);
         User user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         
-        List<UserRole> userRoles = user.getUserRoles();
-        boolean alreadyHasRole = userRoles.stream().anyMatch(ur -> ur.getRole().equals(role));
-
-        if (!alreadyHasRole) {
-            throw new BusinessException(ErrorCode.USER_NOT_HAS_ROLE);
-        }
-
-        UserRole userRole = userRoles.stream()
+        UserRole userRole = user.getUserRoles().stream()
             .filter(ur -> ur.getRole().equals(role))
             .findFirst()
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_HAS_ROLE));
