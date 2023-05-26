@@ -5,6 +5,51 @@
  */
 
 // https://next.vuetifyjs.com/features/sass-variables/`
-// @use 'vuetify' with (
-//   $color-pack: false
-// );
+@use 'vuetify' with (
+  // $color-pack: false,
+  $body-font-family: 'SpoqaHanSansNeo',
+);
+
+// Bold font style
+@font-face {
+  font-family: 'SpoqaHanSansNeo';
+  src: url('@/assets/fonts/SpoqaHanSansNeo-Bold.woff2') format('woff2');
+  font-weight: 700; // bold
+  font-style: normal;
+}
+
+// Light font style
+@font-face {
+  font-family: 'SpoqaHanSansNeo';
+  src: url('@/assets/fonts/SpoqaHanSansNeo-Light.woff2') format('woff2');
+  font-weight: 300; // light
+  font-style: normal;
+}
+
+// Medium font style
+@font-face {
+  font-family: 'SpoqaHanSansNeo';
+  src: url('@/assets/fonts/SpoqaHanSansNeo-Medium.woff2') format('woff2');
+  font-weight: 500; // medium
+  font-style: normal;
+}
+
+// Regular font style
+@font-face {
+  font-family: 'SpoqaHanSansNeo';
+  src: url('@/assets/fonts/SpoqaHanSansNeo-Regular.woff2') format('woff2');
+  font-weight: 400; // regular
+  font-style: normal;
+}
+
+// Thin font style
+@font-face {
+  font-family: 'SpoqaHanSansNeo';
+  src: url('@/assets/fonts/SpoqaHanSansNeo-Thin.woff2') format('woff2');
+  font-weight: 100; // thin
+  font-style: normal;
+}
+
+// html, body {
+//   font-family: 'SpoqaHanSansNeo', sans-serif;
+// }

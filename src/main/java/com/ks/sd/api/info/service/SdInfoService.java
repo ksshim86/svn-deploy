@@ -1,5 +1,6 @@
 package com.ks.sd.api.info.service;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ public class SdInfoService {
      * @return SdInfo
      */
     public SdInfo saveSdInfo(SdInfo sdInfo) {
-        if (sdInfoRepository.findById(ONLY_ONE_ROW).isPresent()) {
+        if (ONLY_ONE_ROW <= sdInfoRepository.count()) {
             throw new BusinessException(ErrorCode.SD_INFO_ALREADY_EXIST);
         }
         
@@ -60,8 +61,12 @@ public class SdInfoService {
 
         String sdRootPath = sdInfo.getSdRootPath();
 
-        if (!SdFileUtil.mkdirs(Paths.get(sdRootPath).toString())) {
-            throw new BusinessException(ErrorCode.SVR_MKDIR_FAILED);
+        boolean isDirectory = new File(sdRootPath).isDirectory();
+
+        if (!isDirectory) {
+            if (!SdFileUtil.mkdirs(Paths.get(sdRootPath).toString())) {
+                throw new BusinessException(ErrorCode.SVR_MKDIR_FAILED);
+            }
         }
 
         return sdInfoRepository.save(sdInfo);

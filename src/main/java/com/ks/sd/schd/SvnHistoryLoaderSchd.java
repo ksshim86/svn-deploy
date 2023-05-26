@@ -25,7 +25,7 @@ public class SvnHistoryLoaderSchd {
     
     private final ConcurrentHashMap<Integer, Boolean> projectThreadStatus = new ConcurrentHashMap<>();
 
-    @Scheduled(fixedRate = 30000)
+    // @Scheduled(fixedRate = 30000)
     public void performTask() {
         // 삭제되지 않고, 프로젝트가 시작되었고, 배포가 진행중이지 않고, 리비전 수집이 시작이 아닌 프로젝트 조회
         // 리비전 수집 상태도 확인하는 이유는 서브 프로젝트 등록 시, 리비전 수집 상태를 시작으로 업데이트 하기 때문에
